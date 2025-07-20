@@ -35,7 +35,7 @@ const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Assuming token includes userId and email
+    req.user = decoded; 
     req.userId = decoded.userId
     next();
   } catch (err) {
@@ -108,11 +108,21 @@ async function addNewUser(userData){
     }
 }
 
+app.get('/allUsers', authenticate, async (req, res) => {
+    try {
+        const user = await User.find()
+        res.status(200).json({userData: user})
+    } catch (error) {
+        res.status(500).json({error: "Failed to fetch wishlist/cart."})
+    }
+})
+
 
 app.get('/userProfile', authenticate, async (req, res) => {
     try {
         const user = await User.findById(req.userId).populate('wishlist').populate('cart')
         res.status(200).json({
+            userData: user,
             wishlist: user.wishlist,
             cart: user.cart
         })
@@ -128,7 +138,7 @@ app.post('/userProfile', async (req, res) => {
         return res.status(409).json({ error: 'User with this email already exists.' });
     }
         const addUser = await addNewUser(req.body)
-        const token = jwt.sign({ userId: addUser._id, email: addUser.email }, JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ userId: addUser._id, email: addUser.email }, JWT_SECRET, { expiresIn: '2h' });
         res.status(200).json({message: "User added successfully.", user: {firstName: addUser.firstName, lastName: addUser.lastName, email: addUser.email}, token: token})
     } catch (error) {
         res.status(400).json({error: error.message || "Failed to add user."})
@@ -155,7 +165,7 @@ async function fetchUserData(userData){
 app.post('/userProfile/verify', async (req, res) => {
     try {
         const user = await fetchUserData(req.body)
-        const token = jwt.sign({userId: user._id, email: user.email}, JWT_SECRET, {expiresIn: '7d' })
+        const token = jwt.sign({userId: user._id, email: user.email}, JWT_SECRET, {expiresIn: '2h' })
         res.status(200).json({message: "User Verified successfully.", user: {firstName: user.firstName, lastName: user.lastName, email: user.email }, token})
     } catch (error) {
         res.status(401).json({error: error.message || "Failed to verify user."})
