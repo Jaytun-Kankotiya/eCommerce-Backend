@@ -22,6 +22,7 @@ const Product = require('./models/product.models')
 const User = require('./models/userDetails.models');
 const Wishlist = require('./models/wishlist.models');
 const Cart = require('./models/cart.models');
+const Address = require('./models/address.models');
 
 
 initializedata()
@@ -185,8 +186,6 @@ async function wishlistAdd(productData){
 
 app.post('/wishlist', authenticate, async (req, res) => {
     try {
-        console.log("Wishlist request body:", req.body);
-        console.log("User ID:", req.userId);
         const saved = await wishlistAdd({...req.body, userId: req.userId})
 
         await User.findByIdAndUpdate(req.userId, {
@@ -237,8 +236,6 @@ async function cartAdd(productData){
 
 app.post('/cartItems', authenticate, async (req, res) => {
     try {
-        console.log("Cart request body:", req.body);
-        console.log("User ID:", req.userId);
         const saved = await cartAdd({...req.body, userId: req.userId})
 
         await User.findByIdAndUpdate(req.userId, {
@@ -246,7 +243,6 @@ app.post('/cartItems', authenticate, async (req, res) => {
         })
         res.status(200).json({message: "Cart Data added successfully.", data: saved})
     } catch (error) {
-          console.error("Error in /cartItems:", error)
         res.status(500).json({error: "Not found."})
     }
 })
@@ -275,10 +271,54 @@ app.delete("/cartItems/:id", authenticate, async (req, res) => {
     }
 })
 
+async function addressAdd(productData){
+    try {
+        const newAddress = new Address(productData)
+        const addressSave = await newAddress.save()
+        return addressSave
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+app.post('/address', authenticate, async (req,res) => {
+    try {
+        const saved = await addressAdd({...req.body, userId: req.userId})
+        console.log("Saved Address userId:", saved.userId);
+        await Address.findByIdAndUpdate(req.userId, {
+            $push: {addresses: saved._id}
+        })
+        res.status(200).json({message: "New Address added successfully.", data: saved})
 
+    } catch (error) {
+        res.status(401).json({error: "Error adding new address."})
+    }
+})
 
+app.get('/address', authenticate, async (req, res) => {
+    try {
+        const fetchedAddress = await Address.find({userId: req.userId})
+        console.log("Fetched Addresses:", fetchedAddress);
+        res.status(200).json({message: "Address data", data: fetchedAddress})
+    } catch (error) {
+        res.status(401).json({error: "Failed to fetch address data."})
+    }
+})
 
+app.get('/address/:id', authenticate, async (req, res) =>{
+    try {
+        const addressToDelete = await Address.findOneAndDelete({_id: req.params.id, userId: req.userId})
+        if(!addressToDelete){
+            res.status(404).json({error: "Address not found."})
+        }
+        await Address.findByIdAndUpdate(req.userId, {
+            $pull: {addresses: addressToDelete._id}
+        })
+        return res.status(200).json({message: "Address removed from saved addresses.", data: addressToDelete})
+    } catch (error) {
+        res.status(401).json({error: "Failed to delete address."})
+    }
+})
 
 
 
