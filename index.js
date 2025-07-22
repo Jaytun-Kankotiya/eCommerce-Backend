@@ -305,15 +305,16 @@ app.get('/address', authenticate, async (req, res) => {
     }
 })
 
-app.get('/address/:id', authenticate, async (req, res) =>{
+app.delete('/address/:id', authenticate, async (req, res) =>{
+    // console.log("User ID from token:", req.userId);
     try {
         const addressToDelete = await Address.findOneAndDelete({_id: req.params.id, userId: req.userId})
         if(!addressToDelete){
             res.status(404).json({error: "Address not found."})
         }
-        await Address.findByIdAndUpdate(req.userId, {
-            $pull: {addresses: addressToDelete._id}
-        })
+        // await User.findByIdAndUpdate(req.userId, {
+        //     $pull: {addresses: addressToDelete._id}
+        // })
         return res.status(200).json({message: "Address removed from saved addresses.", data: addressToDelete})
     } catch (error) {
         res.status(401).json({error: "Failed to delete address."})
