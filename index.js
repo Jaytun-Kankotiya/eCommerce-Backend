@@ -154,7 +154,7 @@ async function fetchUserData(userData){
         }
         const isMatch = await bcrypt.compare(userData.password, fetchUser.password)
         if(!isMatch){
-            throw new Error("Invalid Credentials.")
+            throw new Error("Check your Email or password and try again!")
         }
         return fetchUser
     } catch (error) {
@@ -321,6 +321,17 @@ app.delete('/address/:id', authenticate, async (req, res) =>{
     }
 })
 
+
+app.put("/address/:id", authenticate, async (req, res) => {
+    try {
+        const addressToUpdate = await Address.findOneAndUpdate({_id: req.params.id, userId: req.userId}, {$set: req.body}, {new: true}) 
+        if(!addressToUpdate) return res.status(404).json({error: "Address not found."})
+        
+        res.status(200).json({message: "Address updated successfully.", data: addressToUpdate})
+    } catch (error) {
+        res.status(500).json({error: "Failed to update address."})
+    }
+})
 
 
 
