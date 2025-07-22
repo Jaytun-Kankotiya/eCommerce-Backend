@@ -298,7 +298,7 @@ app.post('/address', authenticate, async (req,res) => {
 app.get('/address', authenticate, async (req, res) => {
     try {
         const fetchedAddress = await Address.find({userId: req.userId})
-        console.log("Fetched Addresses:", fetchedAddress);
+        // console.log("Fetched Addresses:", fetchedAddress);
         res.status(200).json({message: "Address data", data: fetchedAddress})
     } catch (error) {
         res.status(401).json({error: "Failed to fetch address data."})
