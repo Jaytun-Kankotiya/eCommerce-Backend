@@ -284,7 +284,7 @@ async function addressAdd(productData){
 app.post('/address', authenticate, async (req,res) => {
     try {
         const saved = await addressAdd({...req.body, userId: req.userId})
-        console.log("Saved Address userId:", saved.userId);
+        // console.log("Saved Address userId:", saved.userId);
         await Address.findByIdAndUpdate(req.userId, {
             $push: {addresses: saved._id}
         })
@@ -306,7 +306,6 @@ app.get('/address', authenticate, async (req, res) => {
 })
 
 app.delete('/address/:id', authenticate, async (req, res) =>{
-    // console.log("User ID from token:", req.userId);
     try {
         const addressToDelete = await Address.findOneAndDelete({_id: req.params.id, userId: req.userId})
         if(!addressToDelete){
