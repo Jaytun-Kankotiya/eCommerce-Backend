@@ -28,6 +28,9 @@ const UserProfileSchema = new mongoose.Schema({
     }],
     addresses: [{
         type: mongoose.Schema.Types.ObjectId, ref: 'Address'
+    }],
+    orders: [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'Orders'
     }]
 })
 

@@ -23,6 +23,7 @@ const User = require('./models/userDetails.models');
 const Wishlist = require('./models/wishlist.models');
 const Cart = require('./models/cart.models');
 const Address = require('./models/address.models');
+const Orders = require('./models/orders.models');
 
 
 initializedata()
@@ -329,6 +330,50 @@ app.put("/address/:id", authenticate, async (req, res) => {
         res.status(200).json({message: "Address updated successfully.", data: addressToUpdate})
     } catch (error) {
         res.status(500).json({error: "Failed to update address."})
+    }
+})
+
+
+async function addOrders(orderData){
+    try {
+        const ordersToAdd = new Orders(orderData)
+        const saveOrder = await ordersToAdd.save()
+        return saveOrder
+    } catch (error) {
+        throw error
+    }
+}
+
+app.post("/orders", authenticate, async (req, res) => {
+    try {
+        const savedAddresses = await addOrders({...req.body, userId: req.userId })
+        await Orders.findByIdAndUpdate(req.userId, {
+            $push: {orders: savedAddresses._id}
+        })
+        res.status(200).json({message: "New Order Added Successfully.", data: savedAddresses})
+    } catch (error) {
+        res.status(401).json({error: "Error adding new order."})
+    }
+})
+
+app.get("/orders", authenticate, async (req, res) => {
+    try {
+        const fetchOrders = await Orders.find({userId: req.userId})
+        res.status(200).json({message: "Address Data:", data: fetchOrders})
+    } catch (error) {
+        res.status(401).json({error: "Error fetching orders list."})
+    }
+})
+
+app.delete("/orders/:id", authenticate, async (req, res) => {
+    try {
+        const orderToDelete = await Orders.findOneAndDelete({_id: req.params.id, userId: req.userId})
+        if(!orderToDelete){
+            res.status(404).json({error: "Address not found."})
+        }
+        res.status(200).json({message: "Oerder deleted successfully.", data: orderToDelete})
+    } catch (error) {
+        res.status(401).json({error: "Error deleting orders data."})
     }
 })
 
