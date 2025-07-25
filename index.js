@@ -352,7 +352,8 @@ app.post("/orders", authenticate, async (req, res) => {
     try {
         const savedAddresses = await addOrders({...req.body, userId: req.userId })
         await User.findByIdAndUpdate(req.userId, {
-            $push: {orders: savedAddresses._id}
+            $push: {orders: savedAddresses._id},
+            $set: {cart: []}
         })
         res.status(200).json({message: "New Order Added Successfully.", data: savedAddresses})
     } catch (error) {
