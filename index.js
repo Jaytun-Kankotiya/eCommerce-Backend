@@ -32,7 +32,9 @@ const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader) return res.status(401).json({ error: 'No token provided.' });
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader && authHeader.startsWith("Bearer ")
+  ? authHeader.split(" ")[1]
+  : null;
   if (!token) return res.status(401).json({ error: 'Invalid token format.' });
 
   try {
@@ -41,6 +43,7 @@ const authenticate = (req, res, next) => {
     req.userId = decoded.userId
     next();
   } catch (err) {
+    console.error("JWT verification error:", err.message);
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
@@ -286,7 +289,7 @@ app.post('/address', authenticate, async (req,res) => {
     try {
         const saved = await addressAdd({...req.body, userId: req.userId})
         // console.log("Saved Address userId:", saved.userId);
-        await Address.findByIdAndUpdate(req.userId, {
+        await User.findByIdAndUpdate(req.userId, {
             $push: {addresses: saved._id}
         })
         res.status(200).json({message: "New Address added successfully.", data: saved})
@@ -347,7 +350,7 @@ async function addOrders(orderData){
 app.post("/orders", authenticate, async (req, res) => {
     try {
         const savedAddresses = await addOrders({...req.body, userId: req.userId })
-        await Orders.findByIdAndUpdate(req.userId, {
+        await User.findByIdAndUpdate(req.userId, {
             $push: {orders: savedAddresses._id}
         })
         res.status(200).json({message: "New Order Added Successfully.", data: savedAddresses})
@@ -359,7 +362,7 @@ app.post("/orders", authenticate, async (req, res) => {
 app.get("/orders", authenticate, async (req, res) => {
     try {
         const fetchOrders = await Orders.find({userId: req.userId})
-        res.status(200).json({message: "Address Data:", data: fetchOrders})
+        res.status(200).json({message: "Orders Data:", data: fetchOrders})
     } catch (error) {
         res.status(401).json({error: "Error fetching orders list."})
     }
