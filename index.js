@@ -41,6 +41,7 @@ const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; 
     req.userId = decoded.userId
+    console.log("Decoded Token:", decoded);
     next();
   } catch (err) {
     console.error("JWT verification error:", err.message);
@@ -355,7 +356,7 @@ app.post("/orders", authenticate, async (req, res) => {
         })
         res.status(200).json({message: "New Order Added Successfully.", data: savedAddresses})
     } catch (error) {
-        res.status(401).json({error: "Error adding new order."})
+        res.status(500).json({error: "Error adding new order."})
     }
 })
 
@@ -379,7 +380,6 @@ app.delete("/orders/:id", authenticate, async (req, res) => {
         res.status(401).json({error: "Error deleting orders data."})
     }
 })
-
 
 
 
