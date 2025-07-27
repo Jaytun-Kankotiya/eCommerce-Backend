@@ -41,10 +41,8 @@ const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; 
     req.userId = decoded.userId
-    console.log("Decoded Token:", decoded);
     next();
   } catch (err) {
-    console.error("JWT verification error:", err.message);
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
@@ -198,7 +196,6 @@ app.post('/wishlist', authenticate, async (req, res) => {
         })
         res.status(200).json({message: "Product added to wishlist", data: saved})
     } catch (error) {
-        console.error("Error in /wishlist:", error)
         res.status(500).json({error: "Not found."})
     }
 })
@@ -303,7 +300,6 @@ app.post('/address', authenticate, async (req,res) => {
 app.get('/address', authenticate, async (req, res) => {
     try {
         const fetchedAddress = await Address.find({userId: req.userId})
-        // console.log("Fetched Addresses:", fetchedAddress);
         res.status(200).json({message: "Address data", data: fetchedAddress})
     } catch (error) {
         res.status(401).json({error: "Failed to fetch address data."})
@@ -316,9 +312,6 @@ app.delete('/address/:id', authenticate, async (req, res) =>{
         if(!addressToDelete){
             res.status(404).json({error: "Address not found."})
         }
-        // await User.findByIdAndUpdate(req.userId, {
-        //     $pull: {addresses: addressToDelete._id}
-        // })
         return res.status(200).json({message: "Address removed from saved addresses.", data: addressToDelete})
     } catch (error) {
         res.status(401).json({error: "Failed to delete address."})
@@ -353,10 +346,8 @@ app.post("/orders", authenticate, async (req, res) => {
         const savedAddresses = await addOrders({...req.body, userId: req.userId })
         await User.findByIdAndUpdate(req.userId, {
             $push: {orders: savedAddresses._id}
-            // $set: {cart: []}
         })
         await Cart.deleteMany({userId: req.userId})
-        console.log("Cart cleared from DB for:", req.userId);
         res.status(200).json({message: "New Order Added Successfully.", data: savedAddresses})
     } catch (error) {
         res.status(500).json({error: "Error adding new order."})
