@@ -376,14 +376,13 @@ app.delete("/orders/:id", authenticate, async (req, res) => {
     try {
         const orderToDelete = await Orders.findOneAndDelete({_id: req.params.id, userId: req.userId})
         if(!orderToDelete){
-            res.status(404).json({error: "Address not found."})
+            res.status(404).json({error: "Order Data not found."})
         }
         res.status(200).json({message: "Oerder deleted successfully.", data: orderToDelete})
     } catch (error) {
         res.status(401).json({error: "Error deleting orders data."})
     }
 })
-
 
 
 const PORT = 3000
