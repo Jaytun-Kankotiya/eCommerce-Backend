@@ -387,6 +387,15 @@ app.get("/address/:id", authenticate, async (req, res) => {
     }
 })
 
+app.patch("/address/:id", authenticate, async (req, res) => {
+    try {
+        const dataToUpdate = await Address.findOneAndUpdate({_id: req.params.id, userId: req.userId}, {$set: req.body}, {new: true})
+        if(!dataToUpdate) return res.status(404).json({error: "Address data not found."})
+    } catch (error) {
+        res.status(500).json({error: "Not found"})
+    }
+})
+
 
 const PORT = 3000
 

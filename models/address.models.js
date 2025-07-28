@@ -35,6 +35,7 @@ const AddressSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    default: Boolean,
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
