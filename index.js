@@ -25,7 +25,6 @@ const Cart = require('./models/cart.models');
 const Address = require('./models/address.models');
 const Orders = require('./models/orders.models');
 
-
 initializedata()
 
 const authenticate = (req, res, next) => {
@@ -372,6 +371,19 @@ app.delete("/orders/:id", authenticate, async (req, res) => {
         res.status(200).json({message: "Oerder deleted successfully.", data: orderToDelete})
     } catch (error) {
         res.status(401).json({error: "Error deleting orders data."})
+    }
+})
+
+app.get("/address/:id", authenticate, async (req, res) => {
+    try {
+        const fetchAddress = await Address.findById(req.params.id)
+        if(fetchAddress){
+            res.status(200).json({message: "Address fetched by Id", data: fetchAddress})
+        }else {
+      res.status(404).json({ error: "Address not found." });
+    }
+    } catch (error) {
+        res.status(500).json({error: "Not Found."})
     }
 })
 
