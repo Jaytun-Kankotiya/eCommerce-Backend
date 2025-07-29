@@ -46,6 +46,10 @@ const authenticate = (req, res, next) => {
   }
 };
 
+app.get("/", async (req, res) => {
+    res.send({activeStatus: true, error: false})
+})
+
 app.post("/productListing", async (req, res) => {
   try {
     const newData = await Product.insertMany(productsData);
