@@ -37,7 +37,7 @@ const authenticate = (req, res, next) => {
   if (!token) return res.status(401).json({ error: "Invalid token format." });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     req.userId = decoded.userId;
     next();
@@ -89,7 +89,7 @@ app.get("/productListing/:category", async (req, res) => {
   }
 });
 
-app.get("/productDetails/:id", async (req, res) => {
+app.get("/product_details/:id", async (req, res) => {
   try {
     const productDetails = await Product.findOne({ id: req.params.id });
     if (productDetails) {
@@ -276,6 +276,13 @@ async function cartAdd(productData) {
 
 app.post("/cartItems", authenticate, async (req, res) => {
   try {
+    const user = await User.findById(req.userId).populate('cart')
+    const alreadyInCart = user.cart.some((item) => item.id === req.body.id) 
+
+    if(alreadyInCart){
+      return res.status(409).json({error: "Product already in cart"})
+    }
+
     const saved = await cartAdd({ ...req.body, userId: req.userId });
 
     await User.findByIdAndUpdate(req.userId, {
@@ -334,7 +341,6 @@ async function addressAdd(productData) {
 app.post("/address", authenticate, async (req, res) => {
   try {
     const saved = await addressAdd({ ...req.body, userId: req.userId });
-    // console.log("Saved Address userId:", saved.userId);
     await User.findByIdAndUpdate(req.userId, {
       $push: { addresses: saved._id },
     });
