@@ -60,7 +60,7 @@ npm start   # or yarn start
 
 ### **POST /userProfile**</br>
 
-Reguster a new user</br>
+Add a new user</br>
 Sample Response:</br>
 
 ```
