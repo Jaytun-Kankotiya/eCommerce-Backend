@@ -64,7 +64,7 @@ Add a new user</br>
 Sample Response:</br>
 
 ```
-[{ "userId": "abc123", "token": "your-jwt-token"}, ...]
+{ "userId": "abc123", "token": "your-jwt-token"}
 ```
 
 ### **GET /productListing**</br>
@@ -91,7 +91,7 @@ Retrieves detailed information about a specific product:</br>
 Sample Response:</br>
 
 ```
-[{_id, name, price, image, category, and description, rating}, ...]
+{_id, name, price, image, category, and description, rating}
 ```
 
 ### **GET /cartItems**</br>
